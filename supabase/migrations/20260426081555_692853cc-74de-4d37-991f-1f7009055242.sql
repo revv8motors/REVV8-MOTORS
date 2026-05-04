@@ -1,0 +1,1 @@
+ALTER TABLE public.inquiries ADD COLUMN IF NOT EXISTS read_at timestamp with time zone;

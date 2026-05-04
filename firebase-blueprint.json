@@ -1,0 +1,99 @@
+{
+  "entities": {
+    "car": {
+      "title": "Car",
+      "description": "A car available for sale or rent.",
+      "type": "object",
+      "properties": {
+        "archived": { "type": "boolean" },
+        "brand": { "type": "string" },
+        "category": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "description": { "type": "string" },
+        "discounted_price": { "type": "number" },
+        "engine": { "type": "string" },
+        "featured": { "type": "boolean" },
+        "fuel": { "type": "string" },
+        "id": { "type": "string" },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "inspection_passed": { "type": "boolean" },
+        "is_certified": { "type": "boolean" },
+        "is_on_offer": { "type": "boolean" },
+        "is_premium": { "type": "boolean" },
+        "mileage": { "type": "number" },
+        "model": { "type": "string" },
+        "offer_text": { "type": "string" },
+        "ownership": { "type": "string" },
+        "price": { "type": "number" },
+        "price_badge": { "type": "string" },
+        "published": { "type": "boolean" },
+        "show_price": { "type": "boolean" },
+        "status": { "type": "string" },
+        "title": { "type": "string" },
+        "transmission": { "type": "string" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "warranty_available": { "type": "boolean" },
+        "year": { "type": "number" }
+      },
+      "required": ["brand", "fuel", "model", "price", "title", "transmission", "year"]
+    },
+    "inquiry": {
+      "title": "Inquiry",
+      "description": "User inquiry about a car or general inquiry.",
+      "type": "object",
+      "properties": {
+        "car_id": { "type": "string", "description": "The ID of the car being inquired about" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "email": { "type": "string", "format": "email" },
+        "id": { "type": "string" },
+        "message": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "read": { "type": "boolean" },
+        "read_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "message", "name"]
+    },
+    "site_content": {
+      "title": "Site Content",
+      "description": "Dynamic content on the site, e.g. text or settings.",
+      "type": "object",
+      "properties": {
+        "key": { "type": "string" },
+        "value": { "type": "object" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["key", "value"]
+    },
+    "user_role": {
+      "title": "User Role",
+      "description": "Role given to a user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "role": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["user_id", "role"]
+    }
+  },
+  "firestore": {
+    "cars": {
+      "schema": { "$ref": "#/entities/car" },
+      "description": "Cars in the inventory"
+    },
+    "inquiries": {
+      "schema": { "$ref": "#/entities/inquiry" },
+      "description": "Contact inquiries from users"
+    },
+    "site_content": {
+      "schema": { "$ref": "#/entities/site_content" },
+      "description": "Website settings and content blocks"
+    },
+    "user_roles": {
+      "schema": { "$ref": "#/entities/user_role" },
+      "description": "Roles associated to a user (like 'admin')"
+    }
+  }
+}

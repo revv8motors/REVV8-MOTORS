@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    
+    // Admin check - allow the hardcoded email even if not verified for development ease, 
+    // but prefer verified in production.
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'revv8motors@gmail.com' ||
+        exists(/databases/$(database)/documents/user_roles/$(request.auth.uid)) && 
+        get(/databases/$(database)/documents/user_roles/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+
+    // --- Validation Blueprints ---
+    function isValidCar(data) {
+      return data.keys().hasAll(['brand', 'model', 'year', 'price', 'fuel', 'transmission', 'category', 'featured', 'published', 'images', 'title']) && 
+             data.brand is string && data.brand.size() <= 100 &&
+             data.model is string && data.model.size() <= 150 &&
+             data.title is string && data.title.size() <= 255 &&
+             (data.price is string || data.price is number) &&
+             data.year is number &&
+             data.fuel is string &&
+             data.transmission is string &&
+             data.category is string &&
+             data.featured is bool &&
+             data.published is bool &&
+             data.images is list &&
+             // Optional fields validation
+             (!('status' in data) || data.status is string) &&
+             (!('archived' in data) || data.archived is bool) &&
+             (!('mileage' in data) || data.mileage is number) &&
+             (!('engine' in data) || data.engine == null || data.engine is string) &&
+             (!('ownership' in data) || data.ownership == null || data.ownership is string) &&
+             (!('description' in data) || data.description == null || data.description is string) &&
+             (!('discountedPrice' in data) || data.discountedPrice == null || data.discountedPrice is string || data.discountedPrice is number) &&
+             (!('metaTitle' in data) || data.metaTitle == null || data.metaTitle is string) &&
+             (!('metaDescription' in data) || data.metaDescription == null || data.metaDescription is string) &&
+             (!('slug' in data) || data.slug is string) &&
+             (!('showPrice' in data) || data.showPrice is bool) &&
+             (!('isOnOffer' in data) || data.isOnOffer is bool) &&
+             (!('offerText' in data) || data.offerText == null || data.offerText is string) &&
+             (!('priceBadge' in data) || data.priceBadge is string) &&
+             (!('isCertified' in data) || data.isCertified is bool) &&
+             (!('isPremium' in data) || data.isPremium is bool) &&
+             (!('warrantyAvailable' in data) || data.warrantyAvailable is bool) &&
+             (!('inspectionPassed' in data) || data.inspectionPassed is bool) &&
+             (!('publishAt' in data) || data.publishAt == null || data.publishAt is string) &&
+             (!('expiryDate' in data) || data.expiryDate == null || data.expiryDate is string) &&
+             (!('updated_at' in data) || data.updated_at is string) &&
+             (!('created_at' in data) || data.created_at is string);
+    }
+
+    function isValidInquiry(data) {
+      return data.keys().hasAll(['email', 'name', 'message']) &&
+             data.name is string && data.name.size() <= 100 &&
+             data.email is string && data.email.size() <= 255 &&
+             data.message is string && data.message.size() <= 10000;
+    }
+
+    // --- Collection Routes ---
+    match /cars/{carId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidCar(incoming());
+      allow update: if isAdmin() && (
+        isValidCar(incoming()) || 
+        incoming().diff(existing()).affectedKeys().hasOnly(['published', 'featured', 'status', 'archived'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /inquiries/{inqId} {
+      allow read, delete: if isAdmin();
+      allow create: if isValidInquiry(incoming());
+      allow update: if isAdmin() && incoming().diff(existing()).affectedKeys().hasOnly(['read', 'read_at']);
+    }
+
+    match /site_content/{keyId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /user_roles/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    match /activityLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+    }
+
+    match /analytics/{statId} {
+      allow read: if isAdmin();
+      allow create, update: if true; // Analytics for views/leads can be anonymous
+    }
+  }
+}
