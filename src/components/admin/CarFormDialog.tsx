@@ -189,7 +189,7 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: {
     
     for (const file of validFiles) {
       try {
-        const base64 = await new Promise<string>((resolve, reject) => {
+        const url = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = (e) => {
             const img = new Image();
@@ -197,7 +197,7 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: {
               const canvas = document.createElement("canvas");
               let width = img.width;
               let height = img.height;
-              const MAX_SIZE = 1200; // Increased size for better quality
+              const MAX_SIZE = 1200;
               
               if (width > height) {
                 if (width > MAX_SIZE) {
@@ -216,8 +216,18 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: {
               const ctx = canvas.getContext("2d");
               if (!ctx) return reject(new Error("Canvas context creation failed"));
               ctx.drawImage(img, 0, 0, width, height);
-              const dataUrl = canvas.toDataURL("image/webp", 0.85); // Improved quality factor
-              resolve(dataUrl);
+              
+              canvas.toBlob(async (blob) => {
+                if (!blob) return reject(new Error("Blob creation failed"));
+                try {
+                  const storageRef = ref(storage, `cars/${Date.now()}_${Math.random().toString(36).substring(7)}.webp`);
+                  await uploadBytes(storageRef, blob);
+                  const downloadUrl = await getDownloadURL(storageRef);
+                  resolve(downloadUrl);
+                } catch (err) {
+                  reject(err);
+                }
+              }, "image/webp", 0.85);
             };
             img.onerror = () => reject(new Error(`Failed to load image: ${file.name}`));
             img.src = e.target?.result as string;
@@ -226,7 +236,7 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: {
           reader.readAsDataURL(file);
         });
         
-        uploaded.push(base64);
+        uploaded.push(url);
         processedCount++;
         setUploadProgress(Math.round((processedCount / validFiles.length) * 100));
       } catch (err) {

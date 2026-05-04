@@ -160,7 +160,7 @@ export function computeDisplayPrice(car: Car, globalSettings?: any) {
       hasDiscount: true,
       originalValue: numericPrice,
       value: numericDiscounted,
-      percentage: Math.round(((numericPrice - numericDiscounted) / numericPrice) * 100)
+      percentage: numericPrice > 0 ? Math.round(((numericPrice - numericDiscounted) / numericPrice) * 100) : 0
     };
   }
   
