@@ -9,6 +9,22 @@ export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const storage = getStorage(app);
 
+// Connectivity Test (as recommended by integration instructions)
+import { doc, getDocFromServer } from "firebase/firestore";
+async function testConnection() {
+  try {
+    // Attempt to read a non-existent doc from server to verify connection
+    await getDocFromServer(doc(db, "_internal_", "connection_test"));
+    console.log("[Firebase] Firestore connection verified.");
+  } catch (error: any) {
+    console.error("[Firebase] Firestore connection failed:", error?.message || error);
+    if (String(error).includes("unavailable")) {
+      console.warn("[Firebase] Detected 'unavailable' error. This may be a network issue or database configuration mismatch.");
+    }
+  }
+}
+testConnection();
+
 export enum OperationType {
   CREATE = 'create',
   UPDATE = 'update',

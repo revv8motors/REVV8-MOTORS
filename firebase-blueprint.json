@@ -76,6 +76,39 @@
         "created_at": { "type": "string", "format": "date-time" }
       },
       "required": ["user_id", "role"]
+    },
+    "site_setting": {
+      "title": "Site Setting",
+      "description": "General site configuration.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "aiProvider": { "type": "string" },
+        "aiModel": { "type": "string" },
+        "aiApiKeyEncrypted": { "type": "string" }
+      }
+    },
+    "activity_log": {
+        "title": "Activity Log",
+        "description": "Logs of user or system activity.",
+        "type": "object",
+        "properties": {
+            "userId": { "type": "string" },
+            "action": { "type": "string" },
+            "timestamp": { "type": "string", "format": "date-time" },
+            "details": { "type": "object" }
+        }
+    },
+    "analytic_stat": {
+        "title": "Analytic Stat",
+        "description": "Analytics data for cars or site.",
+        "type": "object",
+        "properties": {
+            "carId": { "type": "string" },
+            "date": { "type": "string" },
+            "views": { "type": "number" },
+            "leads": { "type": "number" }
+        }
     }
   },
   "firestore": {
@@ -91,9 +124,21 @@
       "schema": { "$ref": "#/entities/site_content" },
       "description": "Website settings and content blocks"
     },
+    "site_settings": {
+      "schema": { "$ref": "#/entities/site_setting" },
+      "description": "Private site settings like AI config"
+    },
     "user_roles": {
       "schema": { "$ref": "#/entities/user_role" },
       "description": "Roles associated to a user (like 'admin')"
+    },
+    "activityLogs": {
+      "schema": { "$ref": "#/entities/activity_log" },
+      "description": "System activity logs"
+    },
+    "analytics": {
+      "schema": { "$ref": "#/entities/analytic_stat" },
+      "description": "Usage analytics metadata"
     }
   }
 }

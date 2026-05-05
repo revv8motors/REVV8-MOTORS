@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { db, storage, handleFirestoreError, OperationType } from "@/lib/firebase";
+import { db, storage, auth, handleFirestoreError, OperationType } from "@/lib/firebase";
 import { doc, collection, addDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Car, CATEGORIES, FUEL_TYPES, TRANSMISSIONS, STATUSES, PRICE_BADGES } from "@/types/car";
@@ -132,6 +132,72 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: {
       }
     }
   }, [open, car, reset]);
+
+  const [isAiLoading, setIsAiLoading] = useState(false);
+
+  const generateAiContent = async (type: "description" | "seo" | "all") => {
+    setIsAiLoading(true);
+    let attempts = 0;
+    const maxAttempts = 2;
+    
+    const performFetch = async (): Promise<void> => {
+      try {
+        attempts++;
+        if (!auth.currentUser) throw new Error("Not logged in");
+        const token = await auth.currentUser.getIdToken();
+        
+        const carData = watch();
+        
+        const res = await fetch("/api/admin/ai/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          body: JSON.stringify({ type, carData })
+        });
+        
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error(`Server connection error (Status ${res.status})`);
+        }
+        
+        if (!res.ok || !data?.success) throw new Error(data?.error || "AI generation failed");
+
+        if (type === "all") {
+          if (data.data.description) setValue("description", data.data.description, { shouldValidate: true, shouldDirty: true });
+          if (data.data.slug) setValue("slug", data.data.slug, { shouldValidate: true, shouldDirty: true });
+          if (data.data.metaTitle) setValue("metaTitle", data.data.metaTitle, { shouldValidate: true, shouldDirty: true });
+          if (data.data.metaDescription) setValue("metaDescription", data.data.metaDescription, { shouldValidate: true, shouldDirty: true });
+          toast.success("AI Content & SEO Generated!");
+        } else if (type === "description" && data.data.description) {
+          setValue("description", data.data.description, { shouldValidate: true, shouldDirty: true });
+          toast.success("Description generated!");
+        } else if (type === "seo") {
+          if (data.data.slug) setValue("slug", data.data.slug, { shouldValidate: true, shouldDirty: true });
+          if (data.data.metaTitle) setValue("metaTitle", data.data.metaTitle, { shouldValidate: true, shouldDirty: true });
+          if (data.data.metaDescription) setValue("metaDescription", data.data.metaDescription, { shouldValidate: true, shouldDirty: true });
+          toast.success("SEO generated!");
+        }
+      } catch (err: any) {
+        if (err?.message === "Failed to fetch" && attempts < maxAttempts) {
+          console.warn(`Fetch failed (attempt ${attempts}), retrying...`);
+          await new Promise(r => setTimeout(r, 1000));
+          return performFetch();
+        }
+        
+        console.error(err);
+        if (err?.message === "Failed to fetch") {
+          toast.error("Network error: Server is unreachable. The server may be restarting, please wait a moment and try again.");
+        } else {
+          toast.error(err.message || "AI generation failed");
+        }
+      }
+    };
+
+    await performFetch().finally(() => {
+      setIsAiLoading(false);
+    });
+  };
 
   const onInvalid = (errors: any) => {
     // Avoid logging the entire errors object because it contains circular references (refs to HTML elements)
@@ -333,7 +399,15 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: {
                 <Field label="Engine"><Input {...register("engine")} className="bg-surface-2 border-white/10" placeholder="5.0L V8" /></Field>
                 <Field label="Ownership"><Input {...register("ownership")} className="bg-surface-2 border-white/10" placeholder="First" /></Field>
               </div>
-              <Field label="Description"><Textarea rows={4} {...register("description")} className="bg-surface-2 border-white/10" /></Field>
+              <Field label="Description">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs tracking-widest text-muted-foreground"></span>
+                  <Button type="button" variant="outlineLuxury" size="sm" onClick={() => generateAiContent("all")} disabled={isAiLoading}>
+                    {isAiLoading ? "Generating…" : "Generate AI Content"}
+                  </Button>
+                </div>
+                <Textarea rows={4} {...register("description")} className="bg-surface-2 border-white/10" />
+              </Field>
             </TabsContent>
 
             <TabsContent value="pricing" className="space-y-4">
@@ -368,7 +442,9 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: {
                 <Field label="Expiry Date (Optional)" error={errors.expiryDate?.message}><Input type="datetime-local" {...register("expiryDate")} className="bg-surface-2 border-white/10" /></Field>
               </div>
               <div className="space-y-4 pt-4">
-                <h4 className="font-display text-sm tracking-widest text-muted-foreground">SEO</h4>
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-display text-sm tracking-widest text-muted-foreground">SEO</h4>
+                </div>
                 <Field label="Slug (Auto-generated if empty)" error={errors.slug?.message}><Input {...register("slug")} className="bg-surface-2 border-white/10" /></Field>
                 <Field label="Meta Title" error={errors.metaTitle?.message}><Input {...register("metaTitle")} className="bg-surface-2 border-white/10" /></Field>
                 <Field label="Meta Description" error={errors.metaDescription?.message}><Textarea rows={2} {...register("metaDescription")} className="bg-surface-2 border-white/10" /></Field>

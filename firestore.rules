@@ -1,17 +1,21 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Default deny
+    // --- Global Safety Net ---
     match /{document=**} {
       allow read, write: if false;
+    }
+
+    // --- Connectivity Test ---
+    match /_internal_/{docId} {
+      allow get: if docId == 'connection_test';
     }
 
     // --- Helpers ---
     function isSignedIn() { return request.auth != null; }
     function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
     
-    // Admin check - allow the hardcoded email even if not verified for development ease, 
-    // but prefer verified in production.
+    // Auth tokens do not contain custom claims. We lookup roles in user_roles.
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'revv8motors@gmail.com' ||
@@ -22,7 +26,9 @@ service cloud.firestore {
 
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
-    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
 
     // --- Validation Blueprints ---
     function isValidCar(data) {
@@ -37,7 +43,7 @@ service cloud.firestore {
              data.category is string &&
              data.featured is bool &&
              data.published is bool &&
-             data.images is list &&
+             data.images is list && data.images.size() <= 20 &&
              // Optional fields validation
              (!('status' in data) || data.status is string) &&
              (!('archived' in data) || data.archived is bool) &&
@@ -45,7 +51,7 @@ service cloud.firestore {
              (!('engine' in data) || data.engine == null || data.engine is string) &&
              (!('ownership' in data) || data.ownership == null || data.ownership is string) &&
              (!('description' in data) || data.description == null || data.description is string) &&
-             (!('discountedPrice' in data) || data.discountedPrice == null || data.discountedPrice is string || data.discountedPrice is number) &&
+             (!('discountedPrice' in data) || (data.discountedPrice == null || data.discountedPrice is string || data.discountedPrice is number)) &&
              (!('metaTitle' in data) || data.metaTitle == null || data.metaTitle is string) &&
              (!('metaDescription' in data) || data.metaDescription == null || data.metaDescription is string) &&
              (!('slug' in data) || data.slug is string) &&
@@ -58,9 +64,7 @@ service cloud.firestore {
              (!('warrantyAvailable' in data) || data.warrantyAvailable is bool) &&
              (!('inspectionPassed' in data) || data.inspectionPassed is bool) &&
              (!('publishAt' in data) || data.publishAt == null || data.publishAt is string) &&
-             (!('expiryDate' in data) || data.expiryDate == null || data.expiryDate is string) &&
-             (!('updated_at' in data) || data.updated_at is string) &&
-             (!('created_at' in data) || data.created_at is string);
+             (!('expiryDate' in data) || data.expiryDate == null || data.expiryDate is string);
     }
 
     function isValidInquiry(data) {
@@ -72,47 +76,56 @@ service cloud.firestore {
 
     // --- Collection Routes ---
     match /cars/{carId} {
-      // Public can only list published and non-archived cars.
-      // They can get a specific car if it's published.
-      allow get: if (resource.data.published == true && resource.data.archived == false) || isAdmin();
+      allow get: if isValidId(carId) && ((resource.data.published == true && resource.data.archived == false) || isAdmin());
       allow list: if (resource.data.published == true && resource.data.archived == false) || isAdmin();
       
-      allow create: if isAdmin() && isValidCar(incoming());
-      allow update: if isAdmin() && (
+      allow create: if isValidId(carId) && isAdmin() && isValidCar(incoming());
+      allow update: if isValidId(carId) && isAdmin() && (
         isValidCar(incoming()) || 
         incoming().diff(existing()).affectedKeys().hasOnly(['published', 'featured', 'status', 'archived'])
       );
-      allow delete: if isAdmin();
+      allow delete: if isValidId(carId) && isAdmin();
     }
 
     match /inquiries/{inqId} {
-      allow read, delete: if isAdmin();
-      allow create: if isValidInquiry(incoming());
-      allow update: if isAdmin() && incoming().diff(existing()).affectedKeys().hasOnly(['read', 'read_at']);
+      allow get: if isValidId(inqId) && isAdmin();
+      allow list: if isAdmin();
+      allow delete: if isValidId(inqId) && isAdmin();
+      allow create: if isValidId(inqId) && isValidInquiry(incoming());
+      allow update: if isValidId(inqId) && isAdmin() && incoming().diff(existing()).affectedKeys().hasOnly(['read', 'read_at']);
     }
 
     match /site_content/{keyId} {
-      allow get: if true;
+      allow get: if isValidId(keyId);
       allow list: if true;
-      allow write: if isAdmin();
+      allow create: if isValidId(keyId) && isAdmin();
+      allow update: if isValidId(keyId) && isAdmin();
+      allow delete: if isValidId(keyId) && isAdmin();
+    }
+
+    match /site_settings/{settingId} {
+      allow get: if isValidId(settingId) && isAdmin();
+      allow list: if isAdmin();
+      allow write: if isValidId(settingId) && isAdmin();
     }
 
     match /user_roles/{uid} {
-      allow get: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow get: if isValidId(uid) && isSignedIn() && (request.auth.uid == uid || isAdmin());
       allow list: if isAdmin();
-      allow write: if isAdmin();
+      allow write: if isValidId(uid) && isAdmin();
     }
 
     match /activityLogs/{logId} {
-      allow get, list: if isAdmin();
-      allow create: if isSignedIn();
+      allow get: if isValidId(logId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isValidId(logId) && isSignedIn();
     }
 
     match /analytics/{statId} {
-      allow get, list: if isAdmin();
-      allow create, update: if isValidId(statId) && 
-        incoming().keys().hasAny(['carId', 'date', 'views', 'leads']) &&
-        incoming().carId is string;
+      allow get: if isValidId(statId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isValidId(statId) && (isAdmin() || isSignedIn());
+      allow update: if isValidId(statId) && (isAdmin() || isSignedIn());
     }
   }
 }
