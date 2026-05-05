@@ -157,7 +157,7 @@ export default function AdminCars() {
   };
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="text-xs font-display tracking-[0.4em] text-muted-foreground mb-1">INVENTORY</div>
@@ -165,9 +165,9 @@ export default function AdminCars() {
         </div>
         <div className="flex flex-wrap gap-2">
           {selected.length > 0 && (
-            <div className="flex items-center gap-2 mr-2 bg-surface-2 p-1 rounded-md border hairline">
+            <div className="flex items-center gap-2 bg-surface-2 p-1 rounded-md border hairline w-full sm:w-auto">
               <Select value={bulkAction} onValueChange={setBulkAction}>
-                <SelectTrigger className="w-[160px] bg-transparent border-none h-8 text-xs">
+                <SelectTrigger className="w-full sm:w-[160px] bg-transparent border-none h-8 text-xs text-left">
                   <SelectValue placeholder="Bulk Action..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -177,10 +177,10 @@ export default function AdminCars() {
                   <SelectItem value="TOGGLE_FEATURED">Set Featured</SelectItem>
                 </SelectContent>
               </Select>
-              <Button size="sm" variant="luxury" disabled={!bulkAction || isBulkLoading} onClick={executeBulkAction} className="h-8 text-xs">Apply</Button>
+              <Button size="sm" variant="luxury" disabled={!bulkAction || isBulkLoading} onClick={executeBulkAction} className="h-8 text-xs shrink-0">Apply</Button>
             </div>
           )}
-          <Button variant="outlineLuxury" size="sm" onClick={seedDummyData} className="text-xs">
+          <Button variant="outlineLuxury" size="sm" onClick={seedDummyData} className="text-xs shrink-0">
             Dummy Data
           </Button>
           <Button variant="luxury" size="sm" onClick={() => { setEditing(null); setOpen(true); }} className="text-xs">
@@ -203,7 +203,7 @@ export default function AdminCars() {
         
         <div className="flex flex-wrap gap-2">
           <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setCurrentPage(1); }}>
-            <SelectTrigger className="w-[130px] bg-surface border-white/10 h-10 text-xs">
+            <SelectTrigger className="w-[calc(50%-4px)] sm:w-[130px] bg-surface border-white/10 h-10 text-xs text-left">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -216,7 +216,7 @@ export default function AdminCars() {
           </Select>
 
           <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setCurrentPage(1); }}>
-            <SelectTrigger className="w-[130px] bg-surface border-white/10 h-10 text-xs">
+            <SelectTrigger className="w-[calc(50%-4px)] sm:w-[130px] bg-surface border-white/10 h-10 text-xs text-left">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
@@ -231,7 +231,7 @@ export default function AdminCars() {
           </Select>
 
           <Select value={publishedFilter} onValueChange={(v) => { setPublishedFilter(v); setCurrentPage(1); }}>
-            <SelectTrigger className="w-[130px] bg-surface border-white/10 h-10 text-xs">
+            <SelectTrigger className="w-[calc(50%-4px)] sm:w-[130px] bg-surface border-white/10 h-10 text-xs text-left">
               <SelectValue placeholder="Publication" />
             </SelectTrigger>
             <SelectContent>
@@ -261,7 +261,8 @@ export default function AdminCars() {
         </div>
       </div>
 
-      <div className="luxury-card overflow-hidden">
+      {/* Desktop Table View */}
+      <div className="hidden md:block luxury-card overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-surface-2 text-xs tracking-widest text-muted-foreground">
             <tr>
@@ -274,7 +275,7 @@ export default function AdminCars() {
                 />
               </th>
               <th className="text-left p-4">CAR</th>
-              <th className="text-left p-4 hidden md:table-cell">PRICE</th>
+              <th className="text-left p-4">PRICE</th>
               <th className="text-center p-4">STATUS</th>
               <th className="text-center p-4">PUBLISHED</th>
               <th className="text-right p-4">ACTIONS</th>
@@ -297,11 +298,11 @@ export default function AdminCars() {
                         </div>
                       </div>
                     </td>
-                    <td className="p-4 hidden md:table-cell font-display">
+                    <td className="p-4 font-display">
                       {isNaN(Number(c.price)) ? c.price : `₹${Number(c.price).toLocaleString("en-IN")}`}
                     </td>
                     <td className="p-4 text-center">
-                      <span className={`px-2 py-1 text-[10px] uppercase tracking-wider rounded-full ${c.status === 'SOLD' ? 'bg-red-500/20 text-red-500' : 'bg-green-500/20 text-green-500'}`}>{c.status || "AVAILABLE"}</span>
+                      <span className={`px-2 py-1 text-[10px] uppercase tracking-wider rounded-full ${c.status === 'SOLD' ? 'bg-red-500/20 text-red-500' : c.status === 'RESERVED' ? 'bg-orange-500/20 text-orange-500' : 'bg-green-500/20 text-green-500'}`}>{c.status ? c.status.replace('_', ' ') : "AVAILABLE"}</span>
                     </td>
                     <td className="p-4 text-center">
                       <Switch checked={c.published} onCheckedChange={(v) => toggle(c, "published", v)} />
@@ -335,8 +336,75 @@ export default function AdminCars() {
         </table>
       </div>
 
+      {/* Mobile Vertical List View */}
+      <div className="md:hidden space-y-4">
+        {isLoading ? (
+          <div className="p-12 text-center text-muted-foreground">Loading…</div>
+        ) : paginatedCars.length === 0 ? (
+          <div className="p-12 text-center text-muted-foreground">No cars yet. Add your first.</div>
+        ) : (
+          paginatedCars.map((c) => (
+            <div key={c.id} className="relative bg-surface rounded-xl border hairline overflow-hidden shadow-sm">
+              <div className="p-4 flex flex-col gap-4">
+                {/* Top Section */}
+                <div className="flex items-start gap-4">
+                  <div className="pt-1">
+                    <input 
+                      type="checkbox" 
+                      checked={selected.includes(c.id)} 
+                      onChange={(e) => e.target.checked ? setSelected([...selected, c.id]) : setSelected(selected.filter(id => id !== c.id))} 
+                      className="rounded bg-surface-2 border-white/20 h-5 w-5"
+                    />
+                  </div>
+                  <img src={c.images?.[0] || "/placeholder.svg"} alt="" className="h-20 w-28 object-cover rounded-md bg-surface-2 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-base truncate">{c.brand} {c.model}</div>
+                    {c.title && <div className="text-xs text-muted-foreground italic mb-1 truncate">{c.title}</div>}
+                    <div className="text-xs text-muted-foreground mb-2">{c.category} · {c.year}</div>
+                    <div className="text-sm font-display text-luxury">
+                      {isNaN(Number(c.price)) ? c.price : `₹${Number(c.price).toLocaleString("en-IN")}`}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t hairline flex items-center justify-between">
+                  <span className={`px-2 py-1 text-[10px] uppercase tracking-wider rounded-full ${c.status === 'SOLD' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : c.status === 'RESERVED' ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-green-500/10 text-green-500 border border-green-500/20'}`}>
+                    {c.status ? c.status.replace('_', ' ') : "AVAILABLE"}
+                  </span>
+                  
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mr-2">
+                       <span className="text-[10px] text-muted-foreground uppercase">{c.published ? 'Visible' : 'Hidden'}</span>
+                       <Switch checked={c.published} onCheckedChange={(v) => toggle(c, "published", v)} />
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground" onClick={() => { setEditing(c); setOpen(true); }}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="w-[90vw] bg-surface border-white/10 rounded-xl">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Archive this car?</AlertDialogTitle>
+                          <AlertDialogDescription>This will move the car out of public view but keep its data intact.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => remove(c)} className="bg-destructive text-white">Archive</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-6 px-2">
+        <div className="flex flex-col gap-4 sm:flex-row items-center justify-between mt-6 px-2">
           <div className="text-xs text-muted-foreground">
             Showing <span className="font-medium text-foreground">{(currentPage - 1) * pageSize + 1}</span> to <span className="font-medium text-foreground">{Math.min(currentPage * pageSize, filteredCars.length)}</span> of <span className="font-medium text-foreground">{filteredCars.length}</span> results
           </div>

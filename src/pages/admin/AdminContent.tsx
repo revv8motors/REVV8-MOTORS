@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const KEYS = ["hero", "about", "contact", "testimonials", "footer"] as const;
 
@@ -42,17 +43,34 @@ export default function AdminContent() {
   const get = (key: string) => data?.find((d: any) => d.key === key)?.value;
 
   return (
-    <div className="p-8 max-w-4xl">
-      <div className="mb-8">
-        <div className="text-xs font-display tracking-[0.4em] text-muted-foreground mb-2">CMS</div>
-        <h1 className="font-display font-bold text-3xl">Site Content</h1>
-        <p className="text-muted-foreground mt-2 text-sm">Edit any text shown across the public website.</p>
+    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+      <div className="mb-6 md:mb-8">
+        <div className="text-[10px] md:text-xs font-display tracking-[0.4em] text-muted-foreground mb-1 md:mb-2">CMS</div>
+        <h1 className="font-display font-bold text-2xl md:text-3xl">Site Content</h1>
+        <p className="text-muted-foreground mt-1 md:mt-2 text-sm max-w-full">Edit any text shown across the public website.</p>
       </div>
 
-      <div className="flex gap-2 mb-6 border-b hairline">
+      {/* Mobile Select Navigation */}
+      <div className="md:hidden mb-6 w-full">
+        <Select value={active} onValueChange={(v) => setActive(v as typeof KEYS[number])}>
+          <SelectTrigger className="w-full bg-surface-2 border-white/10 h-12 text-xs font-display tracking-[0.2em] uppercase">
+            <SelectValue placeholder="Select Section" />
+          </SelectTrigger>
+          <SelectContent>
+            {KEYS.map(k => (
+              <SelectItem key={k} value={k} className="uppercase tracking-[0.2em] text-xs font-display">
+                {k}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Desktop Tab Navigation */}
+      <div className="hidden md:flex flex-wrap gap-2 mb-6 border-b hairline pb-2 w-full">
         {KEYS.map(k => (
           <button key={k} onClick={() => setActive(k)}
-            className={`px-4 py-3 text-xs tracking-[0.3em] font-display uppercase border-b-2 transition-colors ${active === k ? "border-white text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+            className={`px-3 py-2 text-xs tracking-[0.3em] font-display uppercase border-b-2 transition-colors ${active === k ? "border-white text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
             {k}
           </button>
         ))}
@@ -86,10 +104,12 @@ function HeroEditor({ initial, onSave }: { initial: any; onSave: (v: unknown) =>
   }, [initial]);
   return (
     <div className="space-y-4">
-      <Field label="Title"><Input value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} className="bg-surface-2 border-white/10" /></Field>
-      <Field label="Subtitle"><Textarea value={v.subtitle} onChange={(e) => setV({ ...v, subtitle: e.target.value })} className="bg-surface-2 border-white/10" /></Field>
-      <Field label="CTA Label"><Input value={v.cta} onChange={(e) => setV({ ...v, cta: e.target.value })} className="bg-surface-2 border-white/10" /></Field>
-      <Button variant="luxury" onClick={() => onSave(v)}>Save</Button>
+      <Field label="Title"><Input value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} className="bg-surface-2 border-white/10 w-full" /></Field>
+      <Field label="Subtitle"><Textarea value={v.subtitle} onChange={(e) => setV({ ...v, subtitle: e.target.value })} className="bg-surface-2 border-white/10 w-full" /></Field>
+      <Field label="CTA Label"><Input value={v.cta} onChange={(e) => setV({ ...v, cta: e.target.value })} className="bg-surface-2 border-white/10 w-full" /></Field>
+      <div className="pt-2">
+        <Button variant="luxury" onClick={() => onSave(v)} className="w-full sm:w-auto">Save</Button>
+      </div>
     </div>
   );
 }
@@ -114,22 +134,24 @@ function AboutEditor({ initial, onSave }: { initial: any; onSave: (v: unknown) =
   }, [initial]);
   return (
     <div className="space-y-4">
-      <Field label="Title"><Input value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} className="bg-surface-2 border-white/10" /></Field>
-      <Field label="Body"><Textarea rows={5} value={v.body} onChange={(e) => setV({ ...v, body: e.target.value })} className="bg-surface-2 border-white/10" /></Field>
+      <Field label="Title"><Input value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} className="bg-surface-2 border-white/10 w-full" /></Field>
+      <Field label="Body"><Textarea rows={5} value={v.body} onChange={(e) => setV({ ...v, body: e.target.value })} className="bg-surface-2 border-white/10 w-full" /></Field>
       <div>
         <Label className="text-xs tracking-widest text-muted-foreground">STATS</Label>
-        <div className="space-y-2 mt-2">
+        <div className="space-y-3 sm:space-y-2 mt-2">
           {v.stats.map((s, i) => (
-            <div key={i} className="flex gap-2">
-              <Input placeholder="Value" value={s.value} onChange={(e) => { const c = [...v.stats]; c[i] = { ...c[i], value: e.target.value }; setV({ ...v, stats: c }); }} className="bg-surface-2 border-white/10" />
-              <Input placeholder="Label" value={s.label} onChange={(e) => { const c = [...v.stats]; c[i] = { ...c[i], label: e.target.value }; setV({ ...v, stats: c }); }} className="bg-surface-2 border-white/10" />
-              <Button variant="ghost" size="icon" onClick={() => setV({ ...v, stats: v.stats.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
+            <div key={i} className="flex flex-col sm:flex-row gap-2">
+              <Input placeholder="Value" value={s.value} onChange={(e) => { const c = [...v.stats]; c[i] = { ...c[i], value: e.target.value }; setV({ ...v, stats: c }); }} className="bg-surface-2 border-white/10 w-full" />
+              <Input placeholder="Label" value={s.label} onChange={(e) => { const c = [...v.stats]; c[i] = { ...c[i], label: e.target.value }; setV({ ...v, stats: c }); }} className="bg-surface-2 border-white/10 w-full" />
+              <Button variant="ghost" size="icon" className="self-end sm:self-auto shrink-0" onClick={() => setV({ ...v, stats: v.stats.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
             </div>
           ))}
-          <Button variant="outlineLuxury" size="sm" onClick={() => setV({ ...v, stats: [...v.stats, { label: "", value: "" }] })}><Plus className="h-3.5 w-3.5 mr-1" />Add stat</Button>
+          <Button variant="outlineLuxury" size="sm" onClick={() => setV({ ...v, stats: [...v.stats, { label: "", value: "" }] })} className="w-full sm:w-auto"><Plus className="h-3.5 w-3.5 mr-1" />Add stat</Button>
         </div>
       </div>
-      <Button variant="luxury" onClick={() => onSave(v)}>Save</Button>
+      <div className="pt-2">
+        <Button variant="luxury" onClick={() => onSave(v)} className="w-full sm:w-auto">Save</Button>
+      </div>
     </div>
   );
 }
@@ -159,13 +181,15 @@ function ContactEditor({ initial, onSave }: { initial: any; onSave: (v: unknown)
   }, [initial]);
   return (
     <div className="space-y-4">
-      <Field label="Email"><Input value={v.email} onChange={(e) => setV({ ...v, email: e.target.value })} className="bg-surface-2 border-white/10" /></Field>
-      <Field label="Phone"><Input value={v.phone} onChange={(e) => setV({ ...v, phone: e.target.value })} className="bg-surface-2 border-white/10" /></Field>
-      <Field label="WhatsApp number (digits only, with country code)"><Input value={v.whatsapp} onChange={(e) => setV({ ...v, whatsapp: e.target.value })} className="bg-surface-2 border-white/10" placeholder="15550108888" /></Field>
-      <Field label="Address"><Input value={v.address} onChange={(e) => setV({ ...v, address: e.target.value })} className="bg-surface-2 border-white/10" /></Field>
-      <Field label="Hours"><Input value={v.hours} onChange={(e) => setV({ ...v, hours: e.target.value })} className="bg-surface-2 border-white/10" placeholder="e.g. Mon - Sat: 9 AM - 6 PM" /></Field>
-      <Field label="Google Maps embed URL"><Textarea rows={3} value={v.mapEmbed} onChange={(e) => setV({ ...v, mapEmbed: e.target.value })} className="bg-surface-2 border-white/10" /></Field>
-      <Button variant="luxury" onClick={() => onSave(v)}>Save</Button>
+      <Field label="Email"><Input value={v.email} onChange={(e) => setV({ ...v, email: e.target.value })} className="bg-surface-2 border-white/10 w-full" /></Field>
+      <Field label="Phone"><Input value={v.phone} onChange={(e) => setV({ ...v, phone: e.target.value })} className="bg-surface-2 border-white/10 w-full" /></Field>
+      <Field label="WhatsApp number (digits only, with country code)"><Input value={v.whatsapp} onChange={(e) => setV({ ...v, whatsapp: e.target.value })} className="bg-surface-2 border-white/10 w-full" placeholder="15550108888" /></Field>
+      <Field label="Address"><Input value={v.address} onChange={(e) => setV({ ...v, address: e.target.value })} className="bg-surface-2 border-white/10 w-full" /></Field>
+      <Field label="Hours"><Input value={v.hours} onChange={(e) => setV({ ...v, hours: e.target.value })} className="bg-surface-2 border-white/10 w-full" placeholder="e.g. Mon - Sat: 9 AM - 6 PM" /></Field>
+      <Field label="Google Maps embed URL"><Textarea rows={3} value={v.mapEmbed} onChange={(e) => setV({ ...v, mapEmbed: e.target.value })} className="bg-surface-2 border-white/10 w-full" /></Field>
+      <div className="pt-2">
+        <Button variant="luxury" onClick={() => onSave(v)} className="w-full sm:w-auto">Save</Button>
+      </div>
     </div>
   );
 }
@@ -177,17 +201,17 @@ function TestimonialsEditor({ initial, onSave }: { initial: any[]; onSave: (v: u
     <div className="space-y-4">
       {list.map((t, i) => (
         <div key={i} className="luxury-card p-4 space-y-2">
-          <div className="grid grid-cols-2 gap-2">
-            <Input placeholder="Name" value={t.name} onChange={(e) => { const c = [...list]; c[i] = { ...c[i], name: e.target.value }; setList(c); }} className="bg-surface-2 border-white/10" />
-            <Input placeholder="Role/Car" value={t.role} onChange={(e) => { const c = [...list]; c[i] = { ...c[i], role: e.target.value }; setList(c); }} className="bg-surface-2 border-white/10" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <Input placeholder="Name" value={t.name} onChange={(e) => { const c = [...list]; c[i] = { ...c[i], name: e.target.value }; setList(c); }} className="bg-surface-2 border-white/10 w-full" />
+            <Input placeholder="Role/Car" value={t.role} onChange={(e) => { const c = [...list]; c[i] = { ...c[i], role: e.target.value }; setList(c); }} className="bg-surface-2 border-white/10 w-full" />
           </div>
-          <Textarea placeholder="Quote" value={t.text} onChange={(e) => { const c = [...list]; c[i] = { ...c[i], text: e.target.value }; setList(c); }} className="bg-surface-2 border-white/10" />
-          <Button variant="ghost" size="sm" className="text-destructive" onClick={() => setList(list.filter((_, j) => j !== i))}><Trash2 className="h-3.5 w-3.5 mr-1" />Remove</Button>
+          <Textarea placeholder="Quote" value={t.text} onChange={(e) => { const c = [...list]; c[i] = { ...c[i], text: e.target.value }; setList(c); }} className="bg-surface-2 border-white/10 w-full" />
+          <Button variant="ghost" size="sm" className="text-destructive w-full sm:w-auto" onClick={() => setList(list.filter((_, j) => j !== i))}><Trash2 className="h-3.5 w-3.5 mr-1" />Remove</Button>
         </div>
       ))}
-      <div className="flex gap-2">
-        <Button variant="outlineLuxury" onClick={() => setList([...list, { name: "", role: "", text: "" }])}><Plus className="h-3.5 w-3.5 mr-1" />Add</Button>
-        <Button variant="luxury" onClick={() => onSave(list)}>Save all</Button>
+      <div className="flex flex-col sm:flex-row gap-2 pt-2">
+        <Button variant="outlineLuxury" onClick={() => setList([...list, { name: "", role: "", text: "" }])} className="w-full sm:w-auto"><Plus className="h-3.5 w-3.5 mr-1" />Add testimonial</Button>
+        <Button variant="luxury" onClick={() => onSave(list)} className="w-full sm:w-auto">Save all</Button>
       </div>
     </div>
   );
@@ -212,21 +236,23 @@ function FooterEditor({ initial, onSave }: { initial: any; onSave: (v: unknown) 
   }, [initial]);
   return (
     <div className="space-y-4">
-      <Field label="Tagline"><Input value={v.tagline} onChange={(e) => setV({ ...v, tagline: e.target.value })} className="bg-surface-2 border-white/10" /></Field>
+      <Field label="Tagline"><Input value={v.tagline} onChange={(e) => setV({ ...v, tagline: e.target.value })} className="bg-surface-2 border-white/10 w-full" /></Field>
       <div>
         <Label className="text-xs tracking-widest text-muted-foreground">LINKS</Label>
-        <div className="space-y-2 mt-2">
+        <div className="space-y-3 sm:space-y-2 mt-2">
           {v.links.map((l, i) => (
-            <div key={i} className="flex gap-2">
-              <Input placeholder="Label" value={l.label} onChange={(e) => { const c = [...v.links]; c[i] = { ...c[i], label: e.target.value }; setV({ ...v, links: c }); }} className="bg-surface-2 border-white/10" />
-              <Input placeholder="/path" value={l.href} onChange={(e) => { const c = [...v.links]; c[i] = { ...c[i], href: e.target.value }; setV({ ...v, links: c }); }} className="bg-surface-2 border-white/10" />
-              <Button variant="ghost" size="icon" onClick={() => setV({ ...v, links: v.links.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
+            <div key={i} className="flex flex-col sm:flex-row gap-2">
+              <Input placeholder="Label" value={l.label} onChange={(e) => { const c = [...v.links]; c[i] = { ...c[i], label: e.target.value }; setV({ ...v, links: c }); }} className="bg-surface-2 border-white/10 w-full" />
+              <Input placeholder="/path" value={l.href} onChange={(e) => { const c = [...v.links]; c[i] = { ...c[i], href: e.target.value }; setV({ ...v, links: c }); }} className="bg-surface-2 border-white/10 w-full" />
+              <Button variant="ghost" size="icon" className="self-end sm:self-auto shrink-0" onClick={() => setV({ ...v, links: v.links.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
             </div>
           ))}
-          <Button variant="outlineLuxury" size="sm" onClick={() => setV({ ...v, links: [...v.links, { label: "", href: "" }] })}><Plus className="h-3.5 w-3.5 mr-1" />Add link</Button>
+          <Button variant="outlineLuxury" size="sm" onClick={() => setV({ ...v, links: [...v.links, { label: "", href: "" }] })} className="w-full sm:w-auto"><Plus className="h-3.5 w-3.5 mr-1" />Add link</Button>
         </div>
       </div>
-      <Button variant="luxury" onClick={() => onSave(v)}>Save</Button>
+      <div className="pt-2">
+        <Button variant="luxury" onClick={() => onSave(v)} className="w-full sm:w-auto">Save</Button>
+      </div>
     </div>
   );
 }
