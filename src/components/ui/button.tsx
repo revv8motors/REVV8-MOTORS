@@ -19,6 +19,7 @@ const buttonVariants = cva(
         luxury: "bg-white text-black font-semibold tracking-wide hover:bg-white/90 hover:shadow-glow hover:scale-[1.02] transition-all duration-300",
         outlineLuxury: "border border-white/20 bg-transparent text-foreground hover:bg-white/5 hover:border-white/40 backdrop-blur-sm",
         accent: "bg-accent text-accent-foreground hover:bg-accent/90",
+        whatsapp: "bg-[#16a34a] text-white font-semibold hover:bg-[#149142] shadow-sm",
       },
       size: {
         default: "h-10 px-5 py-2",

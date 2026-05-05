@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
+import { db, auth, handleFirestoreError, OperationType } from "@/lib/firebase";
 import { collection, query, where, orderBy, limit, getDocs, getCountFromServer } from "firebase/firestore";
 import { Car, CheckCircle2, Inbox, MailWarning, Star } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -15,12 +15,6 @@ export default function AdminDashboard() {
     queryFn: async () => {
       const getStat = async (q: any, label: string) => {
         try {
-          if (!db.app.options.apiKey) {
-            console.error("[AdminStats] Firebase config seems missing API key?");
-          }
-          if (!auth.currentUser) {
-            console.warn(`[AdminStats] No current user for ${label}`);
-          }
           return await getCountFromServer(q);
         } catch (e) {
           console.error(`[AdminStats] Error fetching ${label}:`, e);

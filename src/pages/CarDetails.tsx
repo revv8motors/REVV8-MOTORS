@@ -152,10 +152,17 @@ export default function CarDetails() {
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4 mt-4">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="luxury" size="lg" className="flex-1"><Phone className="h-4 w-4 mr-2" />Contact Dealer</Button>
+                  <Button 
+                    variant="luxury" 
+                    size="lg"
+                    className="w-full md:flex-1 h-12 md:h-14 text-[11px] font-display tracking-[0.2em] uppercase transition-all duration-300 hover:scale-[1.01] active:scale-95 flex items-center justify-center"
+                  >
+                    <Phone className="h-4 w-4 mr-2 shrink-0 mb-0.5" />
+                    Contact Dealer
+                  </Button>
                 </DialogTrigger>
                 <DialogContent className="bg-surface border-white/10">
                   <DialogHeader><DialogTitle className="font-display tracking-wider">Contact about {car.brand} {car.model}</DialogTitle></DialogHeader>
@@ -163,8 +170,16 @@ export default function CarDetails() {
                 </DialogContent>
               </Dialog>
               {waLink && (
-                <Button asChild variant="outlineLuxury" size="lg" className="flex-1">
-                  <a href={waLink} target="_blank" rel="noreferrer"><WhatsAppIcon className="h-5 w-5 mr-2" />WhatsApp</a>
+                <Button 
+                  asChild 
+                  variant="whatsapp" 
+                  size="lg"
+                  className="w-full md:flex-1 h-12 md:h-14 text-[11px] font-display tracking-[0.2em] uppercase transition-all duration-300 hover:scale-[1.01] active:scale-95 flex items-center justify-center"
+                >
+                  <a href={waLink} target="_blank" rel="noreferrer">
+                    <WhatsAppIcon className="h-5 w-5 mr-2 shrink-0 text-white" />
+                    WhatsApp
+                  </a>
                 </Button>
               )}
             </div>

@@ -31,7 +31,7 @@ export function SiteFooter() {
             {contact?.email && <li>{contact.email}</li>}
             {contact?.phone && <li>{contact.phone}</li>}
             {contact?.address && <li>{contact.address}</li>}
-            {contact?.hours && <li className="text-muted-foreground pt-1">{contact.hours}</li>}
+            {contact?.hours && <li className="text-white pt-1">{contact.hours}</li>}
           </ul>
         </div>
       </div>

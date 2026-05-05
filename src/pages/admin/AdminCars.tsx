@@ -140,22 +140,6 @@ export default function AdminCars() {
     }
   };
 
-  const seedDummyData = async () => {
-    const dummyCars = [
-      { brand: "Toyota", model: "Camry SE", year: 2023, price: 28500, fuel: "Petrol", transmission: "Automatic", category: "Sedan", published: true, featured: true, images: ["https://images.unsplash.com/photo-1550355291-bbee04a92027?auto=format&fit=crop&q=80&w=1200"], description: "Almost new Toyota Camry SE. Excellent condition with full service history. Features include leather seats, sunroof, and advanced safety features.", mileage: 15000, is_certified: true, is_premium: false, warranty_available: true, inspection_passed: true, status: "AVAILABLE", archived: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-      { brand: "BMW", model: "X5 xDrive40i", year: 2022, price: 65000, fuel: "Petrol", transmission: "Automatic", category: "SUV", published: true, featured: true, images: ["https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1200"], description: "Luxurious BMW X5 with premium package. Features panoramic roof, harman/kardon audio, and heads-up display.", mileage: 22000, is_certified: true, is_premium: true, warranty_available: true, inspection_passed: true, status: "AVAILABLE", archived: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-    ];
-    try {
-      for (const car of dummyCars) {
-        await addDoc(collection(db, "cars"), car);
-      }
-      toast.success("Dummy cars loaded!");
-      refresh();
-    } catch (e: unknown) {
-      toast.error("Error generating dummy cars");
-    }
-  };
-
   return (
     <div className="p-4 md:p-8 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -180,9 +164,6 @@ export default function AdminCars() {
               <Button size="sm" variant="luxury" disabled={!bulkAction || isBulkLoading} onClick={executeBulkAction} className="h-8 text-xs shrink-0">Apply</Button>
             </div>
           )}
-          <Button variant="outlineLuxury" size="sm" onClick={seedDummyData} className="text-xs shrink-0">
-            Dummy Data
-          </Button>
           <Button variant="luxury" size="sm" onClick={() => { setEditing(null); setOpen(true); }} className="text-xs">
             <Plus className="h-4 w-4 mr-1" /> Add Car
           </Button>
