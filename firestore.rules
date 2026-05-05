@@ -18,9 +18,7 @@ service cloud.firestore {
     // Auth tokens do not contain custom claims. We lookup roles in user_roles.
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.token.email == 'revv8motors@gmail.com' ||
-        exists(/databases/$(database)/documents/user_roles/$(request.auth.uid)) && 
-        get(/databases/$(database)/documents/user_roles/$(request.auth.uid)).data.role == 'admin'
+        request.auth.token.email.matches('(?i)^revv8motors@gmail\\.com$')
       );
     }
 
@@ -76,15 +74,15 @@ service cloud.firestore {
 
     // --- Collection Routes ---
     match /cars/{carId} {
-      allow get: if isValidId(carId) && ((resource.data.published == true && resource.data.archived == false) || isAdmin());
-      allow list: if (resource.data.published == true && resource.data.archived == false) || isAdmin();
+      allow get: if isAdmin() || (resource.data.published == true && resource.data.archived == false);
+      allow list: if isAdmin() || resource.data.published == true;
       
-      allow create: if isValidId(carId) && isAdmin() && isValidCar(incoming());
-      allow update: if isValidId(carId) && isAdmin() && (
+      allow create: if isAdmin() && isValidCar(incoming());
+      allow update: if isAdmin() && (
         isValidCar(incoming()) || 
         incoming().diff(existing()).affectedKeys().hasOnly(['published', 'featured', 'status', 'archived'])
       );
-      allow delete: if isValidId(carId) && isAdmin();
+      allow delete: if isAdmin();
     }
 
     match /inquiries/{inqId} {

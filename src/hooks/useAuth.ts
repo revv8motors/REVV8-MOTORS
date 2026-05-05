@@ -36,6 +36,7 @@ export function useAuth() {
 
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       if (!mounted) return;
+      console.log("[useAuth] Auth state changed:", u ? `${u.email} (${u.uid})` : "null");
       setUser(u);
       setSession(u ? { user: u } : null);
       if (u) {

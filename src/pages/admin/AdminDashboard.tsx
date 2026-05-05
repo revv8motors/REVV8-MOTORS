@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
 import { collection, query, where, orderBy, limit, getDocs, getCountFromServer } from "firebase/firestore";
 import { Car, CheckCircle2, Inbox, MailWarning, Star } from "lucide-react";
@@ -6,16 +7,34 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 export default function AdminDashboard() {
+  const { user, isAdmin, loading: authLoading } = useAuth();
+  
   const stats = useQuery({
-    queryKey: ["admin-stats"],
+    queryKey: ["admin-stats", user?.uid],
+    enabled: !authLoading && isAdmin,
     queryFn: async () => {
+      const getStat = async (q: any, label: string) => {
+        try {
+          if (!db.app.options.apiKey) {
+            console.error("[AdminStats] Firebase config seems missing API key?");
+          }
+          if (!auth.currentUser) {
+            console.warn(`[AdminStats] No current user for ${label}`);
+          }
+          return await getCountFromServer(q);
+        } catch (e) {
+          console.error(`[AdminStats] Error fetching ${label}:`, e);
+          throw e;
+        }
+      };
+
       try {
         const [carsSnap, pubSnap, featSnap, inqSnap, unreadSnap, recentSnap] = await Promise.all([
-          getCountFromServer(collection(db, "cars")),
-          getCountFromServer(query(collection(db, "cars"), where("published", "==", true))),
-          getCountFromServer(query(collection(db, "cars"), where("featured", "==", true))),
-          getCountFromServer(collection(db, "inquiries")),
-          getCountFromServer(query(collection(db, "inquiries"), where("read", "==", false))),
+          getStat(collection(db, "cars"), "total cars"),
+          getStat(query(collection(db, "cars"), where("published", "==", true)), "published cars"),
+          getStat(query(collection(db, "cars"), where("featured", "==", true)), "featured cars"),
+          getStat(collection(db, "inquiries"), "total inquiries"),
+          getStat(query(collection(db, "inquiries"), where("read", "==", false)), "unread inquiries"),
           getDocs(query(collection(db, "inquiries"), orderBy("created_at", "desc"), limit(5))),
         ]);
 

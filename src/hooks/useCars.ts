@@ -11,6 +11,13 @@ export function useCars(opts?: { featured?: boolean; published?: boolean; limit?
         let q = query(collection(db, "cars"), orderBy("created_at", "desc"));
         if (opts?.featured !== undefined) q = query(q, where("featured", "==", opts.featured));
         if (opts?.published !== undefined) q = query(q, where("published", "==", opts.published));
+        
+        // For security rule compliance, we must filter by archived if not using admin privileges
+        // and we want to ensure the list matches the rule (resource.data.archived == false)
+        if (opts?.published === true) {
+          q = query(q, where("archived", "==", false));
+        }
+        
         if (opts?.limit) q = query(q, limit(opts.limit));
         
         const snapshot = await getDocs(q);
