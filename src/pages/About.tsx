@@ -1,14 +1,20 @@
 import { useEffect } from "react";
 import { useSiteContent } from "@/hooks/useSiteContent";
+import { useSiteImages } from "@/hooks/useSiteImages";
 import { Award, Globe, ShieldCheck, Sparkles } from "lucide-react";
 // import showroomImg from "@/assets/about-showroom.jpg";
 // import craftsmanshipImg from "@/assets/about-craftsmanship.jpg";
-const showroomImg = "https://images.unsplash.com/photo-1562426509-5044a121aa49?auto=format&fit=crop&q=80&w=1200";
-const craftsmanshipImg = "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&q=80&w=1200";
+const defaultShowroomImg = "https://images.unsplash.com/photo-1562426509-5044a121aa49?auto=format&fit=crop&q=80&w=1200";
+const defaultCraftsmanshipImg = "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&q=80&w=1200";
 
 export default function About() {
   useEffect(() => { document.title = "About — REVV8 Motors"; }, []);
   const { data: about } = useSiteContent<{ title: string; body: string; stats: { label: string; value: string }[] }>("about");
+  const { data: showroomImages } = useSiteImages("about_showroom");
+  const { data: craftImages } = useSiteImages("about_craft");
+
+  const showroomImg = showroomImages?.[0]?.url || defaultShowroomImg;
+  const craftsmanshipImg = craftImages?.[0]?.url || defaultCraftsmanshipImg;
 
   const values = [
     { icon: ShieldCheck, title: "Provenance", text: "Every vehicle is fully inspected and history-verified." },
@@ -40,9 +46,9 @@ export default function About() {
       {/* STATS */}
       <section className="py-16 border-y hairline bg-surface/40">
         <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {(about?.stats ?? []).map(s => (
-              <div key={s.label} className="luxury-card p-8 text-center">
+              <div key={s.label} className="luxury-card p-6 md:p-8 text-center">
                 <div className="font-display font-black text-4xl md:text-5xl text-metal">{s.value}</div>
                 <div className="text-xs tracking-widest text-muted-foreground mt-2 uppercase">{s.label}</div>
               </div>

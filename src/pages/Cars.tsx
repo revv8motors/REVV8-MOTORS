@@ -74,14 +74,14 @@ export default function Cars() {
               className="pl-10 h-12 bg-surface border-white/10" />
           </div>
           <Select value={sort} onValueChange={setSort}>
-            <SelectTrigger className="w-[180px] h-12 bg-surface border-white/10"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[180px] h-12 bg-surface border-white/10"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="newest">Newest</SelectItem>
               <SelectItem value="price-asc">Price: Low → High</SelectItem>
               <SelectItem value="price-desc">Price: High → Low</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outlineLuxury" size="lg" onClick={() => setShowFilters(!showFilters)} className="md:hidden">
+          <Button variant="outlineLuxury" size="lg" onClick={() => setShowFilters(!showFilters)} className="w-full sm:w-auto md:hidden">
             <SlidersHorizontal className="h-4 w-4" />
           </Button>
         </div>

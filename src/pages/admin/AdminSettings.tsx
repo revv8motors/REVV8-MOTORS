@@ -133,7 +133,7 @@ export default function AdminSettings() {
   };
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 sm:p-6 md:p-8 max-w-2xl mx-auto md:mx-0">
       <div className="mb-8">
         <div className="text-xs font-display tracking-[0.4em] text-muted-foreground mb-2">SETTINGS</div>
         <h1 className="font-display font-bold text-3xl">Account & System</h1>

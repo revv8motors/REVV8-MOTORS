@@ -372,30 +372,30 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: {
         <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="p-6 pt-2">
           
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-6 bg-surface-2 border-white/5">
-              <TabsTrigger value="basic">Basic</TabsTrigger>
-              <TabsTrigger value="pricing">Pricing</TabsTrigger>
-              <TabsTrigger value="trust">Trust</TabsTrigger>
-              <TabsTrigger value="automation">Status & SEO</TabsTrigger>
-              <TabsTrigger value="media">Media</TabsTrigger>
+            <TabsList className="flex flex-wrap h-auto w-full mb-6 bg-surface-2 border-white/5 p-1 gap-1">
+              <TabsTrigger value="basic" className="flex-1 min-w-[80px]">Basic</TabsTrigger>
+              <TabsTrigger value="pricing" className="flex-1 min-w-[80px]">Pricing</TabsTrigger>
+              <TabsTrigger value="trust" className="flex-1 min-w-[80px]">Trust</TabsTrigger>
+              <TabsTrigger value="automation" className="flex-1 min-w-[80px]">Status & SEO</TabsTrigger>
+              <TabsTrigger value="media" className="flex-1 min-w-[80px]">Media</TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4">
               <Field label="Title" error={errors.title?.message}><Input {...register("title")} className="bg-surface-2 border-white/10" /></Field>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Brand" error={errors.brand?.message}><Input {...register("brand")} className="bg-surface-2 border-white/10" /></Field>
                 <Field label="Model" error={errors.model?.message}><Input {...register("model")} className="bg-surface-2 border-white/10" /></Field>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Year" error={errors.year?.message}><Input type="number" {...register("year")} className="bg-surface-2 border-white/10" /></Field>
                 <Field label="Mileage" error={errors.mileage?.message}><Input type="number" {...register("mileage")} className="bg-surface-2 border-white/10" /></Field>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Field label="Fuel"><SelectFld value={fuel} onChange={(v) => setValue("fuel", v)} options={[...FUEL_TYPES]} /></Field>
                 <Field label="Transmission"><SelectFld value={trans} onChange={(v) => setValue("transmission", v)} options={[...TRANSMISSIONS]} /></Field>
                 <Field label="Category"><SelectFld value={cat} onChange={(v) => setValue("category", v)} options={[...CATEGORIES]} /></Field>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Engine"><Input {...register("engine")} className="bg-surface-2 border-white/10" placeholder="5.0L V8" /></Field>
                 <Field label="Ownership"><Input {...register("ownership")} className="bg-surface-2 border-white/10" placeholder="First" /></Field>
               </div>
@@ -411,22 +411,22 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: {
             </TabsContent>
 
             <TabsContent value="pricing" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Price ($)" error={errors.price?.message}><Input {...register("price")} className="bg-surface-2 border-white/10" placeholder="e.g. 45000 or POA" /></Field>
                 <Field label="Discounted Price ($)" error={errors.discountedPrice?.message}><Input {...register("discountedPrice")} className="bg-surface-2 border-white/10" /></Field>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Offer Text" error={errors.offerText?.message}><Input {...register("offerText")} placeholder="e.g. Save 10% this week" className="bg-surface-2 border-white/10" /></Field>
                 <Field label="Price Badge"><SelectFld value={priceBadge} onChange={setPriceBadge} options={[...PRICE_BADGES]} /></Field>
               </div>
-              <div className="flex gap-6 mt-4 p-4 border hairline bg-surface-2">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-4 p-4 border hairline bg-surface-2 flex-wrap">
                 <label className="flex items-center gap-2 text-sm"><Switch checked={showPrice} onCheckedChange={setShowPrice} /> Show Price publicly</label>
                 <label className="flex items-center gap-2 text-sm"><Switch checked={isOnOffer} onCheckedChange={setIsOnOffer} /> Has Active Offer</label>
               </div>
             </TabsContent>
 
             <TabsContent value="trust" className="space-y-6">
-               <div className="grid grid-cols-2 gap-6 p-4 border hairline bg-surface-2">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 border hairline bg-surface-2 flex-wrap">
                 <label className="flex items-center gap-2 text-sm"><Switch checked={isCertified} onCheckedChange={setIsCertified} /> Is Certified Pre-Owned</label>
                 <label className="flex items-center gap-2 text-sm"><Switch checked={isPremium} onCheckedChange={setIsPremium} /> Is Premium Collection</label>
                 <label className="flex items-center gap-2 text-sm"><Switch checked={warrantyAvailable} onCheckedChange={setWarrantyAvailable} /> Warranty Available</label>
@@ -435,11 +435,11 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: {
             </TabsContent>
 
             <TabsContent value="automation" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 border-b hairline pb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b hairline pb-6">
                 <Field label="Status"><SelectFld value={status} onChange={setStatus} options={[...STATUSES]} /></Field>
-                <div />
-                <Field label="Publish At (Optional)" error={errors.publishAt?.message}><Input type="datetime-local" {...register("publishAt")} className="bg-surface-2 border-white/10" /></Field>
-                <Field label="Expiry Date (Optional)" error={errors.expiryDate?.message}><Input type="datetime-local" {...register("expiryDate")} className="bg-surface-2 border-white/10" /></Field>
+                <div className="hidden sm:block" />
+                <Field label="Publish At (Optional)" error={errors.publishAt?.message}><Input type="datetime-local" {...register("publishAt")} className="bg-surface-2 border-white/10 w-full" /></Field>
+                <Field label="Expiry Date (Optional)" error={errors.expiryDate?.message}><Input type="datetime-local" {...register("expiryDate")} className="bg-surface-2 border-white/10 w-full" /></Field>
               </div>
               <div className="space-y-4 pt-4">
                 <div className="flex justify-between items-center mb-2">
@@ -535,7 +535,7 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: {
                   </label>
                 </div>
               </div>
-              <div className="flex gap-6 pt-4">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 pt-4">
                 <label className="flex items-center gap-2 text-sm"><Switch checked={featured} onCheckedChange={setFeatured} />Featured on Home</label>
                 <label className="flex items-center gap-2 text-sm"><Switch checked={published} onCheckedChange={setPublished} />Published publicly</label>
               </div>

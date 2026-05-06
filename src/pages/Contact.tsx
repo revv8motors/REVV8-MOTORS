@@ -1,13 +1,17 @@
 import { useEffect } from "react";
 import { useSiteContent } from "@/hooks/useSiteContent";
+import { useSiteImages } from "@/hooks/useSiteImages";
 import { ContactDealerForm } from "@/components/site/ContactDealerForm";
 import { Mail, MapPin, Phone, Clock } from "lucide-react";
 // import contactImg from "@/assets/contact-showroom.jpg";
-const contactImg = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1920";
+const defaultContactImg = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1920";
 
 export default function Contact() {
   useEffect(() => { document.title = "Contact — REVV8 Motors"; }, []);
   const { data: contact } = useSiteContent<{ email: string; phone: string; address: string; whatsapp: string; hours: string }>("contact");
+  const { data: contactImages } = useSiteImages("contact_bg");
+
+  const contactImg = contactImages?.[0]?.url || defaultContactImg;
 
   return (
     <div className="pb-24">
@@ -45,7 +49,7 @@ export default function Contact() {
 
           {/* Form side */}
           <div className="lg:col-span-3">
-            <div className="luxury-card p-8 md:p-10">
+            <div className="luxury-card p-6 md:p-10">
               <h2 className="font-display font-bold text-2xl md:text-3xl mb-2">Send a message</h2>
               <p className="text-sm text-muted-foreground mb-8">We typically respond within a few hours.</p>
               <ContactDealerForm />

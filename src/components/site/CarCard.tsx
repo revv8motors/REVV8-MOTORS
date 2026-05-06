@@ -70,10 +70,10 @@ export function CarCard({ car }: { car: Car }) {
           </div>
         </div>
         {car.isOnOffer && car.offerText && <div className="text-[10px] text-green-400 mt-2 bg-green-500/10 inline-block px-2 py-0.5 rounded border border-green-500/20 uppercase tracking-widest">{car.offerText}</div>}
-        <div className="mt-4 grid grid-cols-3 gap-2 text-xs text-muted-foreground border-t hairline pt-4">
-          <div className="flex items-center gap-1.5"><Gauge className="h-3.5 w-3.5" />{car.year}</div>
-          <div className="flex items-center gap-1.5"><Fuel className="h-3.5 w-3.5" />{car.fuel}</div>
-          <div className="flex items-center gap-1.5"><Settings2 className="h-3.5 w-3.5" />{car.transmission}</div>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-[10px] sm:text-xs text-muted-foreground border-t hairline pt-4">
+          <div className="flex items-center gap-1 sm:gap-1.5 truncate"><Gauge className="h-3 sm:h-3.5 w-3 sm:w-3.5 shrink-0" /><span className="truncate">{car.year}</span></div>
+          <div className="flex items-center gap-1 sm:gap-1.5 truncate"><Fuel className="h-3 sm:h-3.5 w-3 sm:w-3.5 shrink-0" /><span className="truncate">{car.fuel}</span></div>
+          <div className="flex items-center gap-1 sm:gap-1.5 truncate"><Settings2 className="h-3 sm:h-3.5 w-3 sm:w-3.5 shrink-0" /><span className="truncate">{car.transmission}</span></div>
         </div>
       </div>
     </Link>

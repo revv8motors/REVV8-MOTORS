@@ -101,6 +101,14 @@ service cloud.firestore {
       allow delete: if isValidId(keyId) && isAdmin();
     }
 
+    match /images/{imgId} {
+      allow get: if isValidId(imgId);
+      allow list: if true;
+      allow create: if isValidId(imgId) && isAdmin();
+      allow update: if isValidId(imgId) && isAdmin();
+      allow delete: if isValidId(imgId) && isAdmin();
+    }
+
     match /site_settings/{settingId} {
       allow get: if isValidId(settingId) && isAdmin();
       allow list: if isAdmin();

@@ -1,12 +1,15 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useSiteContent } from "@/hooks/useSiteContent";
+import { useSiteImages } from "@/hooks/useSiteImages";
 import { useCars } from "@/hooks/useCars";
 import { Button } from "@/components/ui/button";
 import { CarCard } from "@/components/site/CarCard";
 import { CarCardSkeleton } from "@/components/site/CarCardSkeleton";
 import { ArrowRight, Award, Car as CarIcon, Shield, Sparkles, Zap } from "lucide-react";
+import { cn } from "@/lib/utils";
 // import heroImage from "@/assets/hero-car.jpg";
-const heroImage = "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&q=80&w=1920";
+const defaultHeroImage = "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&q=80&w=1920";
 
 const CATEGORIES = [
   { name: "Sports", icon: Zap },
@@ -21,12 +24,35 @@ export default function Home() {
   const { data: testimonials } = useSiteContent<{ name: string; text: string; role: string }[]>("testimonials");
   const { data: featured, isLoading } = useCars({ featured: true, published: true, limit: 6 });
 
+  const { data: sliderImages } = useSiteImages("slider");
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    if (!sliderImages || sliderImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % sliderImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [sliderImages]);
+
+  const activeImages = sliderImages?.length ? sliderImages : [{ id: 'default', url: defaultHeroImage }];
+
   return (
     <>
       {/* HERO */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
         <div className="absolute inset-0">
-          <img src={heroImage} alt="Luxury car" className="w-full h-full object-cover animate-slow-zoom" />
+          {activeImages.map((img, idx) => (
+             <img 
+               key={img.id}
+               src={img.url} 
+               alt="Luxury car" 
+               className={cn(
+                 "absolute inset-0 w-full h-full object-cover transition-opacity duration-1000",
+                 idx === currentSlide ? "opacity-100 animate-slow-zoom" : "opacity-0"
+               )} 
+             />
+          ))}
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-black/30" />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/50" />
         </div>
@@ -43,11 +69,11 @@ export default function Home() {
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mb-10 animate-fade-up delay-100">
               {hero?.subtitle ?? "Curated collection of the world's finest performance machines."}
             </p>
-            <div className="flex flex-wrap gap-4 animate-fade-up delay-200">
-              <Button asChild variant="luxury" size="xl">
+            <div className="flex flex-col sm:flex-row gap-4 animate-fade-up delay-200">
+              <Button asChild variant="luxury" size="xl" className="w-full sm:w-auto">
                 <Link to="/cars">{hero?.cta ?? "Browse Cars"} <ArrowRight className="ml-1 h-4 w-4" /></Link>
               </Button>
-              <Button asChild variant="outlineLuxury" size="xl">
+              <Button asChild variant="outlineLuxury" size="xl" className="w-full sm:w-auto">
                 <Link to="/about">Our Story</Link>
               </Button>
             </div>
@@ -103,7 +129,7 @@ export default function Home() {
             <p className="text-muted-foreground text-lg leading-relaxed mb-8">{about?.body}</p>
             <Button asChild variant="luxury"><Link to="/about">Learn more</Link></Button>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {(about?.stats ?? []).map(s => (
               <div key={s.label} className="luxury-card p-6 text-center">
                 <div className="font-display font-black text-3xl text-metal">{s.value}</div>
